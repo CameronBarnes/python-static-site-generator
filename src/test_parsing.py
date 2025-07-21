@@ -1,9 +1,25 @@
-import unittest
+import unittest, pprint
 
-from parsing import extract_markdown_images, extract_markdown_links, split_nodes_delimiter, split_nodes_link, split_nodes_image
+from parsing import extract_markdown_images, extract_markdown_links, split_nodes_delimiter, split_nodes_link, split_nodes_image, text_to_textnodes
 from textnode import TextNode, TextType
 
 class TestParsing(unittest.TestCase):
+	def test_text_to_text_nodes(self):
+		nodes = text_to_textnodes("This is **text** with an _italic_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)")
+		expected = [
+		    TextNode("This is ", TextType.PLAIN),
+		    TextNode("text", TextType.BOLD),
+		    TextNode(" with an ", TextType.PLAIN),
+		    TextNode("italic", TextType.ITALIC),
+		    TextNode(" word and a ", TextType.PLAIN),
+		    TextNode("code block", TextType.CODE),
+		    TextNode(" and an ", TextType.PLAIN),
+		    TextNode("obi wan image", TextType.IMAGE, "https://i.imgur.com/fJRm4Vk.jpeg"),
+		    TextNode(" and a ", TextType.PLAIN),
+		    TextNode("link", TextType.LINK, "https://boot.dev"),
+		]
+		self.assertEqual(nodes, expected)
+
 	def test_image_parsing(self):
 		text = "This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)"
 		self.assertEqual(extract_markdown_images(text), [("rick roll", "https://i.imgur.com/aKaOqIh.gif"), ("obi wan", "https://i.imgur.com/fJRm4Vk.jpeg")])

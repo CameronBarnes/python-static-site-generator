@@ -2,6 +2,13 @@ import re
 from typing import Callable, Tuple
 from textnode import TextNode, TextType
 
+def text_to_textnodes(text: str) -> list[TextNode]:
+	nodes = [TextNode(text, TextType.PLAIN)]
+	nodes = split_nodes_delimiter(nodes, "**", TextType.BOLD)
+	nodes = split_nodes_delimiter(nodes, "_", TextType.ITALIC)
+	nodes = split_nodes_delimiter(nodes, "`", TextType.CODE)
+	return split_nodes_image(split_nodes_link(nodes))
+
 def extract_markdown_images(text: str) -> list[Tuple[str, str]]:
 	return re.findall(r"!\[(.+?)\]\((.+?)\)", text)
 
@@ -43,6 +50,7 @@ def split_nodes_delimiter(old_nodes: list[TextNode], delimiter: str, text_type: 
 	for node in old_nodes:
 		if not node.text_type == TextType.PLAIN or delimiter not in node.text:
 			out.append(node)
+			continue
 		separated = node.text.split(delimiter)
 		if len(separated) == 1:
 			out.append(node)
