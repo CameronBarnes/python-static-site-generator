@@ -1,6 +1,6 @@
 import unittest
 
-from parsing import extract_markdown_images, extract_markdown_links, split_nodes_delimiter
+from parsing import extract_markdown_images, extract_markdown_links, split_nodes_delimiter, split_nodes_link, split_nodes_image
 from textnode import TextNode, TextType
 
 class TestParsing(unittest.TestCase):
@@ -14,19 +14,70 @@ class TestParsing(unittest.TestCase):
 		self.assertEqual(extract_markdown_links(text), [])
 		text = "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)"
 		self.assertEqual(extract_markdown_links(text), [("to boot dev", "https://www.boot.dev"), ("to youtube", "https://www.youtube.com/@bootdotdev")])
+	
+	def test_link_extraction(self):
+		node = TextNode(
+			"This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)",
+			TextType.PLAIN,
+		)
+		new_nodes = split_nodes_link([node])
+		self.assertEqual(new_nodes, 
+		 [
+			 TextNode("This is text with a link ", TextType.PLAIN),
+			 TextNode("to boot dev", TextType.LINK, "https://www.boot.dev"),
+			 TextNode(" and ", TextType.PLAIN),
+			 TextNode(
+				 "to youtube", TextType.LINK, "https://www.youtube.com/@bootdotdev"
+			 ),
+		 ])
+
+	def test_image_extraction(self):
+		node = TextNode(
+			"This is text with an image ![to boot dev](https://www.boot.dev) and ![to youtube](https://www.youtube.com/@bootdotdev)",
+			TextType.BOLD,
+		)
+		new_nodes = split_nodes_image([node])
+		self.assertEqual(new_nodes, 
+		 [
+			 TextNode("This is text with an image ", TextType.BOLD),
+			 TextNode("to boot dev", TextType.IMAGE, "https://www.boot.dev"),
+			 TextNode(" and ", TextType.BOLD),
+			 TextNode(
+				 "to youtube", TextType.IMAGE, "https://www.youtube.com/@bootdotdev"
+			 ),
+		 ])
+	
+	def test_image_and_link_extraction(self):
+		node = TextNode(
+			"This is text with an image ![to boot dev](https://www.boot.dev) and a link [to youtube](https://www.youtube.com/@bootdotdev). Isnt that neat?!",
+			TextType.ITALIC
+		)
+		new_nodes1 = split_nodes_image(split_nodes_link([node]))
+		new_nodes2 = split_nodes_link(split_nodes_image([node]))
+		self.assertEqual(new_nodes1, new_nodes2)
+		self.assertEqual(new_nodes1, 
+			[
+				TextNode("This is text with an image ", TextType.ITALIC),
+				TextNode("to boot dev", TextType.IMAGE, "https://www.boot.dev"),
+				TextNode(" and a link ", TextType.ITALIC),
+				TextNode("to youtube", TextType.LINK, "https://www.youtube.com/@bootdotdev"),
+				TextNode(". Isnt that neat?!", TextType.ITALIC)
+			]
+		)
 
 	def test_delimiter_parsing(self):
 		old = [TextNode("This is text with a **bolded phrase** in the middle", TextType.PLAIN)]
 		new = split_nodes_delimiter(old, "**", TextType.BOLD)
 		self.assertEqual(new, [
-    		TextNode("This is text with a ", TextType.PLAIN),
-    		TextNode("bolded phrase", TextType.BOLD),
-    		TextNode(" in the middle", TextType.PLAIN),
+			TextNode("This is text with a ", TextType.PLAIN),
+			TextNode("bolded phrase", TextType.BOLD),
+			TextNode(" in the middle", TextType.PLAIN),
 		])
 		old = [TextNode("This is text with a **bolded phrase** in the middle**plusextrajunk", TextType.PLAIN)]
 		new = split_nodes_delimiter(old, "**", TextType.BOLD)
 		self.assertEqual(new, [
-    		TextNode("This is text with a ", TextType.PLAIN),
-    		TextNode("bolded phrase", TextType.BOLD),
-    		TextNode(" in the middle**plusextrajunk", TextType.PLAIN),
+			TextNode("This is text with a ", TextType.PLAIN),
+
+			TextNode("bolded phrase", TextType.BOLD),
+			TextNode(" in the middle**plusextrajunk", TextType.PLAIN),
 		])
