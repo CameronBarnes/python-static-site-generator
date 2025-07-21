@@ -1,7 +1,7 @@
 import unittest
 
 from parsing import *
-from parsing import split_nodes_delimiter
+from parsing import BlockType
 from textnode import TextNode, TextType
 
 class TestParsing(unittest.TestCase):
@@ -24,6 +24,32 @@ This is the same paragraph on a new line
 				"- This is a list\n- with items",
 			],
 		)
+	
+	def test_block_to_block_type(self):
+		self.assertEqual(block_to_block_type("# "), BlockType.PARAGRAPH)
+		self.assertEqual(block_to_block_type("# Heading"), BlockType.HEADING)
+		self.assertEqual(block_to_block_type("###### Head"), BlockType.HEADING)
+		self.assertEqual(block_to_block_type("####### heading"), BlockType.PARAGRAPH)
+		self.assertEqual(block_to_block_type("#"), BlockType.PARAGRAPH)
+		self.assertEqual(block_to_block_type("> "), BlockType.QUOTE)
+		self.assertEqual(block_to_block_type(">"), BlockType.QUOTE)
+		self.assertEqual(block_to_block_type(">> "), BlockType.QUOTE)
+		self.assertEqual(block_to_block_type("01. "), BlockType.PARAGRAPH)
+		self.assertEqual(block_to_block_type("0. "), BlockType.PARAGRAPH)
+		self.assertEqual(block_to_block_type("10. "), BlockType.ORDERED_LIST)
+		self.assertEqual(block_to_block_type("9. "), BlockType.ORDERED_LIST)
+		self.assertEqual(block_to_block_type("```"), BlockType.PARAGRAPH)
+		self.assertEqual(block_to_block_type("``````"), BlockType.CODE)
+		self.assertEqual(block_to_block_type("``` test ```"), BlockType.CODE)
+		self.assertEqual(block_to_block_type("```````"), BlockType.CODE)
+		self.assertEqual(block_to_block_type("-"), BlockType.PARAGRAPH)
+		self.assertEqual(block_to_block_type("-1"), BlockType.PARAGRAPH)
+		self.assertEqual(block_to_block_type("-test"), BlockType.PARAGRAPH)
+		self.assertEqual(block_to_block_type("- test"), BlockType.UNORDERED_LIST)
+		self.assertEqual(block_to_block_type("- "), BlockType.UNORDERED_LIST)
+		self.assertEqual(block_to_block_type("Testing testing 123"), BlockType.PARAGRAPH)
+		self.assertEqual(block_to_block_type(""), BlockType.PARAGRAPH)
+		self.assertEqual(block_to_block_type("123.Hello World!"), BlockType.PARAGRAPH)
 
 	def test_text_to_text_nodes(self):
 		nodes = text_to_textnodes("This is **text** with an _italic_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)")

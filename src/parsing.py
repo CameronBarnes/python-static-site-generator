@@ -1,6 +1,30 @@
 import re
 from typing import Callable, Tuple
 from textnode import TextNode, TextType
+from enum import Enum
+
+class BlockType(Enum):
+	PARAGRAPH = "p",
+	HEADING = "h",
+	CODE = "code",
+	QUOTE = "quote",
+	UNORDERED_LIST = "ul",
+	ORDERED_LIST = "li"
+
+# Technicaally this doesnt catch a bunch of bad inputs, but it should still produce the desired outputs
+def block_to_block_type(block: str) -> BlockType:
+	if block.startswith("```") and block.endswith("```") and len(block) >= 6:
+		return BlockType.CODE
+	elif block.startswith(">"):
+		return BlockType.QUOTE
+	elif block.startswith("- "):
+		return BlockType.UNORDERED_LIST
+	elif re.match(r"#{1,6} .", block):
+		return BlockType.HEADING
+	elif re.match(r"[1-9]\d*\. ", block):
+		return BlockType.ORDERED_LIST
+	else:
+		return BlockType.PARAGRAPH
 
 def markdown_to_blocks(text: str) -> list[str]:
 	out = []
