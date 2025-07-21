@@ -17,7 +17,10 @@ class HTMLNode:
 		return " ".join(out)
 
 	def __repr__(self) -> str:
-		return f"HTMLNode({self.tag}, {self.value}, {self.children}, {self.props})"
+		if self.value is None:
+			return f"HTMLNode({self.tag}, {self.value}, {self.children}, {self.props})"
+		else:
+			return f"HTMLNode({self.tag}, \"{self.value}\", {self.children}, {self.props})"
 
 class ParentNode(HTMLNode):
 	def __init__(self, tag, children, props=None) -> None:
