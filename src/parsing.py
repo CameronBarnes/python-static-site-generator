@@ -2,6 +2,15 @@ import re
 from typing import Callable, Tuple
 from textnode import TextNode, TextType
 
+def markdown_to_blocks(text: str) -> list[str]:
+	out = []
+	for item in text.split("\n\n"):
+		item = item.strip()
+		if item == "":
+			continue
+		out.append(item)
+	return out
+
 def text_to_textnodes(text: str) -> list[TextNode]:
 	nodes = [TextNode(text, TextType.PLAIN)]
 	nodes = split_nodes_delimiter(nodes, "**", TextType.BOLD)

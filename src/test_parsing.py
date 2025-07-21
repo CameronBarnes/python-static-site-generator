@@ -1,22 +1,43 @@
-import unittest, pprint
+import unittest
 
-from parsing import extract_markdown_images, extract_markdown_links, split_nodes_delimiter, split_nodes_link, split_nodes_image, text_to_textnodes
+from parsing import *
+from parsing import split_nodes_delimiter
 from textnode import TextNode, TextType
 
 class TestParsing(unittest.TestCase):
+	def test_markdown_to_blocks(self):
+		md = """
+This is **bolded** paragraph
+
+This is another paragraph with _italic_ text and `code` here
+This is the same paragraph on a new line
+
+- This is a list
+- with items
+"""
+		blocks = markdown_to_blocks(md)
+		self.assertEqual(
+			blocks,
+			[
+				"This is **bolded** paragraph",
+				"This is another paragraph with _italic_ text and `code` here\nThis is the same paragraph on a new line",
+				"- This is a list\n- with items",
+			],
+		)
+
 	def test_text_to_text_nodes(self):
 		nodes = text_to_textnodes("This is **text** with an _italic_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)")
 		expected = [
-		    TextNode("This is ", TextType.PLAIN),
-		    TextNode("text", TextType.BOLD),
-		    TextNode(" with an ", TextType.PLAIN),
-		    TextNode("italic", TextType.ITALIC),
-		    TextNode(" word and a ", TextType.PLAIN),
-		    TextNode("code block", TextType.CODE),
-		    TextNode(" and an ", TextType.PLAIN),
-		    TextNode("obi wan image", TextType.IMAGE, "https://i.imgur.com/fJRm4Vk.jpeg"),
-		    TextNode(" and a ", TextType.PLAIN),
-		    TextNode("link", TextType.LINK, "https://boot.dev"),
+			TextNode("This is ", TextType.PLAIN),
+			TextNode("text", TextType.BOLD),
+			TextNode(" with an ", TextType.PLAIN),
+			TextNode("italic", TextType.ITALIC),
+			TextNode(" word and a ", TextType.PLAIN),
+			TextNode("code block", TextType.CODE),
+			TextNode(" and an ", TextType.PLAIN),
+			TextNode("obi wan image", TextType.IMAGE, "https://i.imgur.com/fJRm4Vk.jpeg"),
+			TextNode(" and a ", TextType.PLAIN),
+			TextNode("link", TextType.LINK, "https://boot.dev"),
 		]
 		self.assertEqual(nodes, expected)
 
@@ -97,3 +118,6 @@ class TestParsing(unittest.TestCase):
 			TextNode("bolded phrase", TextType.BOLD),
 			TextNode(" in the middle**plusextrajunk", TextType.PLAIN),
 		])
+		old = new
+		new = split_nodes_delimiter(old, "**", TextType.BOLD)
+		self.assertEqual(old, new)
