@@ -30,7 +30,7 @@ class ParentNode(HTMLNode):
 		if self.tag is None:
 			raise ValueError("tag is not allowed to be none")
 		elif self.children is None:
-			raise ValueError("ParentNodes must have children, children is None")
+			raise ValueError(f"ParentNodes must have children, children is None. Details: {self}")
 		elif self.props is None:
 			return f'<{self.tag}>{"".join(map(lambda child: child.to_html(), self.children))}</{self.tag}>'
 		else:
