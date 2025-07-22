@@ -19,7 +19,7 @@ def generate_pages_recursive(from_dir: str, template_path: str, dest_dir: str):
 		if os.path.isdir(from_path):
 			generate_pages_recursive(from_path, template_path, dest_path)
 		else:
-			generate_page(from_path, template_path, dest_path)
+			generate_page(from_path, template_path, dest_path.replace("md", "html"))
 
 def generate_page(from_path: str, template_path: str, dest_path: str):
 	print(f"Generating page from {from_path} to {dest_path} using {template_path}")
