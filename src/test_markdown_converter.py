@@ -1,8 +1,21 @@
 import unittest
 
-from markdown_converter import markdown_to_html_node
+from markdown_converter import extract_title, markdown_to_html_node
 
 class TestMarkdownConverter(unittest.TestCase):
+	def test_title_extractor(self):
+		self.assertEqual(extract_title("# Hello World!"), "Hello World!")
+		with self.assertRaises(Exception): 
+			extract_title("Cat Title")
+		with self.assertRaises(Exception): 
+			extract_title("#Cat Title")
+		with self.assertRaises(Exception): 
+			extract_title("##Cat Title")
+		with self.assertRaises(Exception): 
+			extract_title("## Cat Title")
+		with self.assertRaises(Exception): 
+			extract_title(" # Cat Title")
+
 	def test_paragraphs(self):
 		md = """
 This is **bolded** paragraph
